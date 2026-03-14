@@ -3,9 +3,9 @@ public static class Divisors {
     /// Entry point for the Divisors class
     /// </summary>
     public static void Run() {
-        List<int> list = FindDivisors(80);
+        List<int> list = FindDivisors(7);
         Console.WriteLine("<List>{" + string.Join(", ", list) + "}"); // <List>{1, 2, 4, 5, 8, 10, 16, 20, 40}
-        List<int> list1 = FindDivisors(79);
+        List<int> list1 = FindDivisors(12);
         Console.WriteLine("<List>{" + string.Join(", ", list1) + "}"); // <List>{1}
     }
 
@@ -19,6 +19,11 @@ public static class Divisors {
     private static List<int> FindDivisors(int number) {
         List<int> results = new();
         // TODO problem 1
+        for (var index = 1; index < number; index++)
+        {
+            if (number % index == 0)
+                results.Add(index);
+        }
         return results;
     }
 }

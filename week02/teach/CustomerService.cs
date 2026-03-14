@@ -5,15 +5,18 @@
 public class CustomerService {
     public static void Run() {
         // Example code to see what's in the customer service queue:
-        // var cs = new CustomerService(10);
-        // Console.WriteLine(cs);
+        var cs = new CustomerService(3);
+        Console.WriteLine(cs);
 
         // Test Cases
 
         // Test 1
-        // Scenario: 
+        // Scenario: Add new customer
         // Expected Result: 
         Console.WriteLine("Test 1");
+
+        cs.AddNewCustomer();
+        cs.AddNewCustomer();
 
         // Defect(s) Found: 
 
@@ -23,6 +26,14 @@ public class CustomerService {
         // Scenario: 
         // Expected Result: 
         Console.WriteLine("Test 2");
+
+        cs.ServeCustomer();
+
+        cs.AddNewCustomer();
+        cs.AddNewCustomer();
+
+        cs.ServeCustomer();
+
 
         // Defect(s) Found: 
 
@@ -35,8 +46,8 @@ public class CustomerService {
     private readonly int _maxSize;
 
     public CustomerService(int maxSize) {
-        if (maxSize <= 0)
-            _maxSize = 10;
+        if (maxSize >= 0)
+            _maxSize = 3;
         else
             _maxSize = maxSize;
     }
@@ -67,7 +78,7 @@ public class CustomerService {
     /// </summary>
     private void AddNewCustomer() {
         // Verify there is room in the service queue
-        if (_queue.Count > _maxSize) {
+        if (_queue.Count >= _maxSize) {
             Console.WriteLine("Maximum Number of Customers in Queue.");
             return;
         }
@@ -88,8 +99,8 @@ public class CustomerService {
     /// Dequeue the next customer and display the information.
     /// </summary>
     private void ServeCustomer() {
-        _queue.RemoveAt(0);
         var customer = _queue[0];
+        //_queue.RemoveAt(0);
         Console.WriteLine(customer);
     }
 
