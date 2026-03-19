@@ -1,5 +1,6 @@
 ﻿public static class DisplaySums {
     public static void Run() {
+        Console.WriteLine("------------1 to 10");
         DisplaySumPairs([1, 2, 3, 4, 5, 6, 7, 8, 9, 10]);
         // Should show something like (order does not matter):
         // 6 4
@@ -7,14 +8,14 @@
         // 8 2
         // 9 1 
 
-        Console.WriteLine("------------");
+        Console.WriteLine("------------ (-20 to 20)");
         DisplaySumPairs([-20, -15, -10, -5, 0, 5, 10, 15, 20]);
         // Should show something like (order does not matter):
         // 10 0
         // 15 -5
         // 20 -10
 
-        Console.WriteLine("------------");
+        Console.WriteLine("------------ (5 and -1)");
         DisplaySumPairs([5, 11, 2, -4, 6, 8, -1]);
         // Should show something like (order does not matter):
         // 8 2
@@ -27,7 +28,23 @@
     /// in the list.
     /// </summary>
     /// <param name="numbers">array of integers</param>
-    private static void DisplaySumPairs(int[] numbers) {
+    private static void DisplaySumPairs(int[] numbers)
+    {
         // TODO Problem 2 - This should print pairs of numbers in the given array
+        var seenNumbers = new HashSet<int>();
+
+        foreach (var n in numbers)
+        {
+            int target = 10;
+            int complement = target - n;
+
+            if (seenNumbers.Contains(complement))
+            {
+                Console.WriteLine($"{n} {complement}");
+            }
+
+            seenNumbers.Add(n);
+        }
+
     }
 }
