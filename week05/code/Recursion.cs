@@ -14,8 +14,17 @@ public static class Recursion
     /// </summary>
     public static int SumSquaresRecursive(int n)
     {
-        // TODO Start Problem 1
-        return 0;
+        // 1. Caso Base (Salida de emergencia): 
+        // Si n llega a 0 o menos, el anillo se cierra y retornamos 0.
+        if (n <= 0)
+        {
+            return 0;
+        }
+
+        // 2. Paso Recursivo:
+        // Calculamos el cuadrado del nodo actual (n * n) 
+        // y le sumamos el resultado de la "cebolla más pequeña" (n - 1).
+        return (n * n) + SumSquaresRecursive(n - 1);
     }
 
     /// <summary>
@@ -39,7 +48,28 @@ public static class Recursion
     /// </summary>
     public static void PermutationsChoose(List<string> results, string letters, int size, string word = "")
     {
-        // TODO Start Problem 2
+        // 1. Caso Base: 
+        // Si la palabra que estamos construyendo alcanzó el tamaño deseado, 
+        // la agregamos a los resultados.
+        if (word.Length == size)
+        {
+            results.Add(word);
+            return;
+        }
+
+        // 2. Paso Recursivo:
+        // Iteramos sobre las letras disponibles para elegir la siguiente.
+        for (int i = 0; i < letters.Length; i++)
+        {
+            // Extraemos la letra elegida para que no se repita en esta rama
+            char chosenLetter = letters[i];
+            string remainingLetters = letters.Remove(i, 1);
+
+            // Llamada recursiva con el subproblema:
+            // - Pasamos la palabra con la nueva letra agregada
+            // - Pasamos el resto de las letras que quedan disponibles
+            PermutationsChoose(results, remainingLetters, size, word + chosenLetter);
+        }
     }
 
     /// <summary>
@@ -86,20 +116,32 @@ public static class Recursion
     /// </summary>
     public static decimal CountWaysToClimb(int s, Dictionary<int, decimal>? remember = null)
     {
-        // Base Cases
-        if (s == 0)
-            return 0;
-        if (s == 1)
-            return 1;
-        if (s == 2)
-            return 2;
-        if (s == 3)
-            return 4;
+        // Inicializamos el diccionario si es la primera llamada (el Big Bang del proceso)
+        remember ??= new Dictionary<int, decimal>();
 
-        // TODO Start Problem 3
+        // 1. Casos Base (Las salidas de emergencia conocidas)
+        if (s <= 0) return 0;
+        if (s == 1) return 1;
+        if (s == 2) return 2;
+        if (s == 3) return 4;
 
-        // Solve using recursion
-        decimal ways = CountWaysToClimb(s - 1) + CountWaysToClimb(s - 2) + CountWaysToClimb(s - 3);
+        // 2. ¿Ya conocemos la respuesta para este número de escalones?
+        // Si está en el "mapa", lo devolvemos de inmediato. O(1)
+        if (remember.ContainsKey(s))
+        {
+            return remember[s];
+        }
+
+        // 3. Paso Recursivo con "Memoria":
+        // Calculamos la suma de las tres posibilidades de salto.
+        // Pasamos el diccionario 'remember' en cada llamada para que todos compartan la memoria.
+        decimal ways = CountWaysToClimb(s - 1, remember) +
+                       CountWaysToClimb(s - 2, remember) +
+                       CountWaysToClimb(s - 3, remember);
+
+        // 4. Guardamos el resultado antes de devolverlo para futuras consultas.
+        remember[s] = ways;
+
         return ways;
     }
 
@@ -118,7 +160,29 @@ public static class Recursion
     /// </summary>
     public static void WildcardBinary(string pattern, List<string> results)
     {
-        // TODO Start Problem 4
+        // 1. Buscamos la posición del primer comodín en el patrón actual.
+        int index = pattern.IndexOf('*');
+
+        // 2. Caso Base: 
+        // Si no hay más '*', el patrón es ya una cadena binaria pura.
+        // La agregamos a los resultados y detenemos la recursión en esta rama.
+        if (index == -1)
+        {
+            results.Add(pattern);
+            return;
+        }
+
+        // 3. Paso Recursivo:
+        // "Dividimos" el patrón en dos ramas. En ambas mantenemos lo que está 
+        // antes del '*' y lo que está después, pero cambiamos el '*' por 0 y 1.
+
+        // Rama del '0'
+        string patternWithZero = pattern[..index] + "0" + pattern[(index + 1)..];
+        WildcardBinary(patternWithZero, results);
+
+        // Rama del '1'
+        string patternWithOne = pattern[..index] + "1" + pattern[(index + 1)..];
+        WildcardBinary(patternWithOne, results);
     }
 
     /// <summary>
@@ -127,17 +191,43 @@ public static class Recursion
     /// </summary>
     public static void SolveMaze(List<string> results, Maze maze, int x = 0, int y = 0, List<ValueTuple<int, int>>? currPath = null)
     {
-        // If this is the first time running the function, then we need
-        // to initialize the currPath list.
-        if (currPath == null) {
+        // Inicialización del explorador
+        if (currPath == null)
+        {
             currPath = new List<ValueTuple<int, int>>();
         }
-        
-        // currPath.Add((1,2)); // Use this syntax to add to the current path
 
-        // TODO Start Problem 5
-        // ADD CODE HERE
+        // 1. CASOS BASE (Condiciones de parada)
 
-        // results.Add(currPath.AsString()); // Use this to add your path to the results array keeping track of complete maze solutions when you find the solution.
+        // A. ¿Es un movimiento válido? (Límites, paredes y no repetir nodos)
+        if (!maze.IsValidMove(currPath, x, y))
+        {
+            return;
+        }
+
+        // 2. PASO RECURSIVO (Exploración)
+
+        // Agregamos la posición actual al camino
+        currPath.Add((x, y));
+
+        // C. ¿Llegamos a la meta?
+        if (maze.IsEnd(x, y))
+        {
+            results.Add(currPath.AsString());
+        }
+        else
+        {
+            // Si no es el fin, exploramos en las 4 direcciones cardinales
+            // Norte, Sur, Este, Oeste
+            SolveMaze(results, maze, x + 1, y, currPath); // Derecha
+            SolveMaze(results, maze, x - 1, y, currPath); // Izquierda
+            SolveMaze(results, maze, x, y + 1, currPath); // Abajo
+            SolveMaze(results, maze, x, y - 1, currPath); // Arriba
+        }
+
+        // 3. EL BACKTRACK (La limpieza)
+        // Importante: Al terminar de explorar todas las opciones desde (x, y),
+        // debemos removernos del camino para que otras ramas puedan usar este espacio.
+        currPath.RemoveAt(currPath.Count - 1);
     }
 }
