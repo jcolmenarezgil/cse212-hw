@@ -14,16 +14,16 @@ public static class Recursion
     /// </summary>
     public static int SumSquaresRecursive(int n)
     {
-        // 1. Caso Base (Salida de emergencia): 
-        // Si n llega a 0 o menos, el anillo se cierra y retornamos 0.
+        // 1. Base Case (Emergency Exit): 
+        // If n reaches 0 or less, the recursion terminates and we return 0.
         if (n <= 0)
         {
             return 0;
         }
 
-        // 2. Paso Recursivo:
-        // Calculamos el cuadrado del nodo actual (n * n) 
-        // y le sumamos el resultado de la "cebolla más pequeña" (n - 1).
+        // 2. Recursive Step:
+        // Calculate the square of the current value (n * n) 
+        // and add the result of the smaller sub-problem (n - 1).
         return (n * n) + SumSquaresRecursive(n - 1);
     }
 
@@ -48,26 +48,21 @@ public static class Recursion
     /// </summary>
     public static void PermutationsChoose(List<string> results, string letters, int size, string word = "")
     {
-        // 1. Caso Base: 
-        // Si la palabra que estamos construyendo alcanzó el tamaño deseado, 
-        // la agregamos a los resultados.
+        // 1. Base Case: 
         if (word.Length == size)
         {
             results.Add(word);
             return;
         }
 
-        // 2. Paso Recursivo:
-        // Iteramos sobre las letras disponibles para elegir la siguiente.
+        // 2. Recursive Step (Backtracking):
         for (int i = 0; i < letters.Length; i++)
         {
-            // Extraemos la letra elegida para que no se repita en esta rama
+            // Extract the chosen letter to prevent duplicate use in the current branch.
             char chosenLetter = letters[i];
             string remainingLetters = letters.Remove(i, 1);
 
-            // Llamada recursiva con el subproblema:
-            // - Pasamos la palabra con la nueva letra agregada
-            // - Pasamos el resto de las letras que quedan disponibles
+            // Recursive call with the sub-problem:
             PermutationsChoose(results, remainingLetters, size, word + chosenLetter);
         }
     }
@@ -116,30 +111,29 @@ public static class Recursion
     /// </summary>
     public static decimal CountWaysToClimb(int s, Dictionary<int, decimal>? remember = null)
     {
-        // Inicializamos el diccionario si es la primera llamada (el Big Bang del proceso)
+        // Initialize memoization storage if not provided in the initial call
         remember ??= new Dictionary<int, decimal>();
 
-        // 1. Casos Base (Las salidas de emergencia conocidas)
+        // Define base cases for the recurrence relation to prevent infinite recursion
         if (s <= 0) return 0;
         if (s == 1) return 1;
         if (s == 2) return 2;
         if (s == 3) return 4;
 
-        // 2. ¿Ya conocemos la respuesta para este número de escalones?
-        // Si está en el "mapa", lo devolvemos de inmediato. O(1)
+        // Check if the result for the current input has already been computed
+        // Returns the cached value to ensure O(1) retrieval time
         if (remember.ContainsKey(s))
         {
             return remember[s];
         }
 
-        // 3. Paso Recursivo con "Memoria":
-        // Calculamos la suma de las tres posibilidades de salto.
-        // Pasamos el diccionario 'remember' en cada llamada para que todos compartan la memoria.
+        // Perform recursive branching to calculate the sum of the three possible steps
+        // Pass the memoization dictionary to maintain state across the call stack
         decimal ways = CountWaysToClimb(s - 1, remember) +
                        CountWaysToClimb(s - 2, remember) +
                        CountWaysToClimb(s - 3, remember);
 
-        // 4. Guardamos el resultado antes de devolverlo para futuras consultas.
+        // Cache the computed result in the dictionary for future O(1) access
         remember[s] = ways;
 
         return ways;
@@ -160,27 +154,23 @@ public static class Recursion
     /// </summary>
     public static void WildcardBinary(string pattern, List<string> results)
     {
-        // 1. Buscamos la posición del primer comodín en el patrón actual.
+        // Locate the index of the first occurrence of the wildcard character
         int index = pattern.IndexOf('*');
 
-        // 2. Caso Base: 
-        // Si no hay más '*', el patrón es ya una cadena binaria pura.
-        // La agregamos a los resultados y detenemos la recursión en esta rama.
+        // Base Case: If no wildcards remain, the string is fully resolved
+        // Add the literal binary string to the results collection and terminate the branch
         if (index == -1)
         {
             results.Add(pattern);
             return;
         }
 
-        // 3. Paso Recursivo:
-        // "Dividimos" el patrón en dos ramas. En ambas mantenemos lo que está 
-        // antes del '*' y lo que está después, pero cambiamos el '*' por 0 y 1.
-
-        // Rama del '0'
+        // Recursive Step: Execute binary branching by replacing the wildcard
+        // Slice and concatenate the string to inject '0' at the current index, then recurse
         string patternWithZero = pattern[..index] + "0" + pattern[(index + 1)..];
         WildcardBinary(patternWithZero, results);
 
-        // Rama del '1'
+        // Slice and concatenate the string to inject '1' at the current index, then recurse
         string patternWithOne = pattern[..index] + "1" + pattern[(index + 1)..];
         WildcardBinary(patternWithOne, results);
     }
@@ -191,43 +181,42 @@ public static class Recursion
     /// </summary>
     public static void SolveMaze(List<string> results, Maze maze, int x = 0, int y = 0, List<ValueTuple<int, int>>? currPath = null)
     {
-        // Inicialización del explorador
+        // Initialize the path collection if this is the entry point of the recursion
         if (currPath == null)
         {
             currPath = new List<ValueTuple<int, int>>();
         }
 
-        // 1. CASOS BASE (Condiciones de parada)
-
-        // A. ¿Es un movimiento válido? (Límites, paredes y no repetir nodos)
+        // 1. Validation Gateway:
+        // Invoke IsValidMove to verify boundaries, collision data, and cycle prevention.
+        // Must be evaluated BEFORE adding to currPath to avoid self-collision detection.
         if (!maze.IsValidMove(currPath, x, y))
         {
             return;
         }
 
-        // 2. PASO RECURSIVO (Exploración)
-
-        // Agregamos la posición actual al camino
+        // 2. State Progression:
+        // Push the current coordinate into the path stack
         currPath.Add((x, y));
 
-        // C. ¿Llegamos a la meta?
+        // 3. Termination Logic (Target Found):
         if (maze.IsEnd(x, y))
         {
+            // Snapshot the current valid path state to the results list
             results.Add(currPath.AsString());
         }
         else
         {
-            // Si no es el fin, exploramos en las 4 direcciones cardinales
-            // Norte, Sur, Este, Oeste
-            SolveMaze(results, maze, x + 1, y, currPath); // Derecha
-            SolveMaze(results, maze, x - 1, y, currPath); // Izquierda
-            SolveMaze(results, maze, x, y + 1, currPath); // Abajo
-            SolveMaze(results, maze, x, y - 1, currPath); // Arriba
+            // 4. Recursive Exploration:
+            // Branch out into all adjacent cardinal coordinates
+            SolveMaze(results, maze, x + 1, y, currPath); // East
+            SolveMaze(results, maze, x - 1, y, currPath); // West
+            SolveMaze(results, maze, x, y + 1, currPath); // South
+            SolveMaze(results, maze, x, y - 1, currPath); // North
         }
 
-        // 3. EL BACKTRACK (La limpieza)
-        // Importante: Al terminar de explorar todas las opciones desde (x, y),
-        // debemos removernos del camino para que otras ramas puedan usar este espacio.
+        // 5. Memory Recovery (Backtracking):
+        // Pop the current coordinate to restore the stack state for sibling branches
         currPath.RemoveAt(currPath.Count - 1);
     }
 }
